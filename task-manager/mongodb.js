@@ -29,20 +29,38 @@ if(error){
 const db = client.db(databaseName)
 
 ///insert new data, with call back function 
-db.collection('users').insertOne({
-  name: "Mustafa",
-  age: 32
-    }, (error, result) => {
-      if(error) {
-        return console.log("unable to insert user")
-      }
+// db.collection('users').insertOne({
+//   name: "Mustafa",
+//   age: 32
+//     }, (error, result) => {
+//       if(error) {
+//         return console.log("unable to insert user")
+//       }
 
-      console.log(result.ops)
-    })
-
+//       console.log(result.ops)
 
 
+//     })
 
+db.collection('users').insertMany([
+  {
+    name: "jen",
+    age: 28
+  },
+  {
+    name: "Dan",
+    age: 24
+  }
+], (error, result) => {
+
+  if(error){
+    return console.log('unable to insert the data')
+  }
+
+  console.log(result.insertedCount)
+  console.log(result.ops)
+
+})
 
  
 })
