@@ -62,6 +62,26 @@ db.collection('users').insertMany([
 
 })
 
+db.collection('task').insertMany([
+  {
+    duty: "use the washing machine",
+    completed: false
+  },
+  {
+    duty: 'take the trash out',
+    completed: true
+  },
+  {
+    duty: 'Call the doctor',
+    completed: true
+  }
+], (error, result) => {
+  if(error){
+    return console.log('unable to create collection')
+  }
+  
+  console.log(result)
+})
  
 })
 
