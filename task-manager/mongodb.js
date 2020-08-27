@@ -1,11 +1,22 @@
 // CRUD create read update delete
 
 ///npm library we get back an object 
-const mongodb = require("mongodb")
+// const mongodb = require("mongodb") //short cut used below
 
 
-// initialize the connection it give us access to the function we need to connect the database 
-const MongoClient = mongodb.MongoClient
+// // initialize the connection it give us access to the function we need to connect the database 
+// const MongoClient = mongodb.MongoClient //short cut used below
+ 
+// const ObjectID = mongodb.ObjectID //short cut used below
+
+const {MongoClient, ObjectID} = require('mongodb')
+
+const id = new ObjectID()
+
+console.log(id.getTimestamp()) 
+///print out an object id 
+//5f478f218996d932673a67b1
+// getTimestamp() show the first 4 byte that are the time and date when this was generated
 
 
 //// choose the URL you want to connect to
@@ -30,8 +41,9 @@ const db = client.db(databaseName)
 
 ///insert new data, with call back function 
 // db.collection('users').insertOne({
-//   name: "Mustafa",
-//   age: 32
+//   _id: id,
+//   name: "Rachid",
+//   age: 42
 //     }, (error, result) => {
 //       if(error) {
 //         return console.log("unable to insert user")
@@ -42,46 +54,46 @@ const db = client.db(databaseName)
 
 //     })
 
-db.collection('users').insertMany([
-  {
-    name: "jen",
-    age: 28
-  },
-  {
-    name: "Dan",
-    age: 24
-  }
-], (error, result) => {
+// db.collection('users').insertMany([
+//   {
+//     name: "jen",
+//     age: 28
+//   },
+//   {
+//     name: "Dan",
+//     age: 24
+//   }
+// ], (error, result) => {
 
-  if(error){
-    return console.log('unable to insert the data')
-  }
+//   if(error){
+//     return console.log('unable to insert the data')
+//   }
 
-  console.log(result.insertedCount)
-  console.log(result.ops)
+//   console.log(result.insertedCount)
+//   console.log(result.ops)
 
-})
+// })
 
-db.collection('task').insertMany([
-  {
-    duty: "use the washing machine",
-    completed: false
-  },
-  {
-    duty: 'take the trash out',
-    completed: true
-  },
-  {
-    duty: 'Call the doctor',
-    completed: true
-  }
-], (error, result) => {
-  if(error){
-    return console.log('unable to create collection')
-  }
+// db.collection('task').insertMany([
+//   {
+//     duty: "use the washing machine",
+//     completed: false
+//   },
+//   {
+//     duty: 'take the trash out',
+//     completed: true
+//   },
+//   {
+//     duty: 'Call the doctor',
+//     completed: true
+//   }
+// ], (error, result) => {
+//   if(error){
+//     return console.log('unable to create collection')
+//   }
   
-  console.log(result)
-})
+//   console.log(result)
+// })
  
 })
 
