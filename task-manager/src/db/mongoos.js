@@ -8,15 +8,7 @@ mongoose.connect("mongodb://127.0.0.1:27017/task-manager-api", {
   useCreateIndex: true, // ensure that the index get created allowing us to access quickly the data we need to access
 });
 
-///how to create the schema and models collection for the models
-const User = mongoose.model("User", {
-  name: {
-    type: String,
-  },
-  age: {
-    type: Number,
-  },
-});
+
 
 ///created the model
 const Tasks = mongoose.model('Tasks', {
@@ -52,26 +44,51 @@ console.log(error)
 })
 
 
-// ///instant of the object
-// const Mustafa = new User({
-//   name: "Mustafa",
-//   age: 32,
-// });
 
-// //save method which return a promisses
-// Mustafa.save()
-//   .then((user) => {
-//     console.log(Mustafa);
-//   })
-//   .catch((error) => {
-//     console.log(error);
-//   });
 
-// ///delete method by id
-// User.remove({ _id: ObjectID("5f49257773f7000b5f3ce51f") }, (error, resp) => {
-//   if (error) {
-//     console.log("faild to delte");
-//   } else {
-//     console.log(resp);
-//   }
-// });
+
+
+
+
+
+
+
+///how to create the schema and models collection for the models
+const User = mongoose.model("User", {
+  name: {
+    type: String,
+    require: true ///validation this filed is required 
+  },
+  age: {
+    type: Number,
+    validate(value){
+      if(value < 0){
+        throw new Error('Age must be a positive Number')
+      }
+    }
+  },
+});
+
+///instant of the object
+const Mustafa = new User({
+  name: "Mustafa",
+  age: 32,
+});
+
+//save method which return a promisses
+Mustafa.save()
+  .then((user) => {
+    console.log(Mustafa);
+  })
+  .catch((error) => {
+    console.log(error);
+  });
+
+///delete method by id
+User.remove({ _id: ObjectID("5f49257773f7000b5f3ce51f") }, (error, resp) => {
+  if (error) {
+    console.log("faild to delte");
+  } else {
+    console.log(resp);
+  }
+});
