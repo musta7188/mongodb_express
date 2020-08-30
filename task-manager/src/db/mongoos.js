@@ -10,85 +10,78 @@ mongoose.connect("mongodb://127.0.0.1:27017/task-manager-api", {
 
 
 
-///created the model
-const Tasks = mongoose.model('Tasks', {
-  description: {
-    type: String
-  },
-  completed: {
-    type: Boolean
-  }
-})
+// ///created the model
+// const Tasks = mongoose.model('Tasks', {
+//   description: {
+//     type: String
+//   },
+//   completed: {
+//     type: Boolean
+//   }
+// })
 
-////created the instance of the model with the filed/schema of the database
-const task1 = new Tasks({
-  description: "take out the dog",
-  completed: false
-})
+// ////created the instance of the model with the filed/schema of the database
+// const task1 = new Tasks({
+//   description: "take out the dog",
+//   completed: false
+// })
 
-const task2 = new Tasks({
-  description: "take the trash out",
-  completed: true
-})
+// const task2 = new Tasks({
+//   description: "take the trash out",
+//   completed: true
+// })
 
-///array to push all the tasks
-const arrayOfTasks = []
+// ///array to push all the tasks
+// const arrayOfTasks = []
 
-arrayOfTasks.push(task1, task2)
+// arrayOfTasks.push(task1, task2)
 
-///instead of save() method used the insertMany for multiple task to save
-Tasks.insertMany(arrayOfTasks).then((response) => {
-  console.log(response)
-}).catch((error) => {
-console.log(error)
-})
-
-
-
-
-
-
-
+// ///instead of save() method used the insertMany for multiple task to save
+// Tasks.insertMany(arrayOfTasks).then((response) => {
+//   console.log(response)
+// }).catch((error) => {
+// console.log(error)
+// })
 
 
 
 
 ///how to create the schema and models collection for the models
-const User = mongoose.model("User", {
-  name: {
-    type: String,
-    require: true ///validation this filed is required 
-  },
-  age: {
-    type: Number,
-    validate(value){
-      if(value < 0){
-        throw new Error('Age must be a positive Number')
-      }
-    }
-  },
-});
+// const User = mongoose.model("User", {
+//   name: {
+//     type: String,
+//     require: true ///validation this filed is required 
+//   },
+//   age: {
+//     type: Number,
+//     validate(value){
+//       if(value < 0){
+//         throw new Error('Age must be a positive Number')
+//       }
+//     }
+//   },
+// });
 
 ///instant of the object
-const Mustafa = new User({
-  name: "Mustafa",
-  age: 32,
-});
+// const Mustafa = new User({
+//   name: "Mustafa",
+//   age: 32,
+// });
 
-//save method which return a promisses
-Mustafa.save()
-  .then((user) => {
-    console.log(Mustafa);
-  })
-  .catch((error) => {
-    console.log(error);
-  });
+// //save method which return a promisses
+// Mustafa.save()
+//   .then((user) => {
+//     console.log(Mustafa);
+//   })
+//   .catch((error) => {
+//     console.log(error);
+//   });
 
-///delete method by id
-User.remove({ _id: ObjectID("5f49257773f7000b5f3ce51f") }, (error, resp) => {
-  if (error) {
-    console.log("faild to delte");
-  } else {
-    console.log(resp);
-  }
-});
+// ///delete method by id
+// User.remove({ _id: ObjectID("5f49257773f7000b5f3ce51f") }, (error, resp) => {
+//   if (error) {
+//     console.log("faild to delte");
+//   } else {
+//     console.log(resp);
+//   }
+// });
