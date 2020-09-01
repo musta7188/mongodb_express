@@ -68,43 +68,75 @@ app.get("/users/:id", async (req, res) => {
   
 });
 
-app.get("/tasks", (req, resp) => {
-  Task.find({})
-    .then((tasks) => {
-      resp.status(200).send(tasks);
-    })
-    .catch((e) => {
-      resp.status(500).send(e);
-    });
+
+app.patch('/users/:id', async (req, resp) =>{
+      
+  // console.log(req.body)
+  try {
+                                                 /// new :true : this will return the new user with the updates
+                                              ////runValidators: true : make sure we use validator to get the format we accepted
+    const user = await User.findByIdAndUpdate(req.params.id, req.body, {new :true, runValidators: true})
+
+    if(!user) {
+      return resp.status(404).send()
+    }
+    
+    resp.send(user)
+
+  } catch(e) {
+
+    resp.status(400).send(e)
+  }
+
+})
+
+
+
+
+
+app.get("/tasks", async (req, resp) => {
+
+
+ try {
+      const tasks = await Task.find({})
+      resp.status(201).send(tasks)
+
+ } catch (e) {
+    resp.status(500).send(e)
+ }
 });
 
-app.get("/tasks/:id", (req, resp) => {
+app.get("/tasks/:id", async (req, resp) => {
   const _id = req.params.id;
 
-  Task.findById(_id)
-    .then((task) => {
-      if (!task) {
-        return resp.status(404).send();
-      }
+  try {
+  const task = await Task.findById(_id)
+    if(!task){
+      return resp.status(404).send("task not found")
+    }
 
-      resp.status(200).send(task);
-    })
-    .catch((e) => {
-      resp.status(500).send(e);
-    });
+    resp.status(201).send(task)
+
+
+  } catch (e) {
+      resp.status(500).send(e)
+  }
+
+
 });
 
-app.post("/tasks", (req, resp) => {
-  const task = new Task(req.body);
+app.post("/tasks", async (req, resp) => {
 
-  task
-    .save()
-    .then(() => {
-      resp.status(201).send(task);
-    })
-    .catch((error) => {
-      resp.status(400).send(error);
-    });
+  const task = new Task(req.body)
+
+  try {
+
+      await task.save(task)
+       resp.status(201).send(task)
+  } catch(e) {
+    resp.status(500).send(e)
+  }
+
 });
 
 // app.delete('/users/:age', (req, resp) =>{
