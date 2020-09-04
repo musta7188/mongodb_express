@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const validator = require("validator")
-
+const bcrypt = require('bcrypt')
 /// we will costumize the schema before passed to the user
 const userSchema = new mongoose.Schema({
   name: {
@@ -58,6 +58,8 @@ userSchema.pre('save', async function(next) {
   if(user.isModified('password')){
     user.password = await bcrypt.hash(user.password, 8)
   }
+
+
 
   ///next tell the function that we done with our task and that the program can go ahead
   next()

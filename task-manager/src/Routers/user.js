@@ -48,10 +48,13 @@ router.get("/users/:id", async (req, res) => {
 router.patch("/users/:id", async (req, resp) => {
   ////grap all the keys sent from the body
   const updates = Object.keys(req.body);
+
   ///create all the properties you allow to update
   const allowedUpdates = ["name", "email", "password", "age"];
+
   ///loop in every key sent and check if include the allowed properties
   const isValidOperation = updates.every((update) => {
+    
     ///check if the allowed properties includes the sent one and return boolean value
     return allowedUpdates.includes(update);
   });
@@ -73,7 +76,9 @@ router.patch("/users/:id", async (req, resp) => {
       ///since we are looping thought different properties and we cannot hard coded or know the exact one we are updating
       ///this will create a dynamic way to update the filed we want to update 
     updates.forEach((update) => user[update] = req.body[update])
+
       await user.save()
+      
     if (!user) {
       return resp.status(404).send();
     }
