@@ -1,10 +1,8 @@
 const mongoose = require("mongoose");
-const { ObjectID } = require("mongodb");
 const validator = require("validator")
 
-
-
-const User = mongoose.model("User", {
+/// we will costumize the schema before passed to the user
+const userSchema = new mongoose.Schema({
   name: {
     type: String,
     require: true, ///validation this filed is required 
@@ -46,7 +44,30 @@ const User = mongoose.model("User", {
     }
 
   }
-});
+})
 
 
+
+///.pre allow us to do something before the user schema
+///// first is to save and second is the function to run, (we can just use a normal function not a arrow function)
+userSchema.pre('save', async function(next) {
+  ///this give us access to the current object or current user that is about to be saved
+  const user = this 
+
+  ///check if the password has been changed or modified 
+  if(user.isModified('password')){
+    user.password = await bcrypt.hash(user.password, 8)
+  }
+
+  ///next tell the function that we done with our task and that the program can go ahead
+  next()
+
+})
+
+
+
+
+///the second argument the object get converted into a schema 
+////for the user password security authentication we need to create the schema first and then pass that in
+const User = mongoose.model('User', userSchema)
 module.exports = User

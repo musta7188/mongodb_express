@@ -34,7 +34,7 @@ router.get("/users/:id", async (req, res) => {
   const _id = req.params.id;
 
   try {
-    const user = User.findById({ _id });
+    const user = await User.findById({ _id });
 
     if (!user) {
       return res.status(404).send("user not found try a different id");
@@ -64,11 +64,16 @@ router.patch("/users/:id", async (req, resp) => {
     /// new :true : this will return the new user with the updates
     ////runValidators: true : make sure we use validator to get the format we accepted
 
-    const user = await User.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    ///const user = await User.findByIdAndUpdate(req.params.id, req.body, {new: true,runValidators: true,});
 
+    ////the above function bypass mangoose and perform a direct operation on the data base
+
+    const user = await User.findById(req.params.id)
+
+      ///since we are looping thought different properties and we cannot hard coded or know the exact one we are updating
+      ///this will create a dynamic way to update the filed we want to update 
+    updates.forEach((update) => user[update] = req.body[update])
+      await user.save()
     if (!user) {
       return resp.status(404).send();
     }
