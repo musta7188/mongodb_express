@@ -10,6 +10,7 @@ const app = express();
 
 const port = process.env.PORT || 3000;
 
+
 ///transform the JSON data as an object to be able to access
 app.use(express.json());
 app.use(UserRouter)
@@ -21,22 +22,18 @@ app.listen(port, () => {
 });
 
 
-// const bcrypt = require('bcrypt')
 
+// const jwt =  require('jsonwebtoken')
 // const myFunction  = async () =>{
 
-//   const password = 'Mustaa7188'
+//   ////how we create a token and set the expire data
+//   const token = jwt.sign({ _id: 'abc123'}, 'secretWord', {expiresIn: '7 second'})
+//   console.log(token)
 
-//   /// hash method takes the password and the number of times need to run the logic to hash the string 8 is the perfect number 
-//   const hashedPassword = await bcrypt.hash(password, 8)
-
-//   console.log(password)
-//   console.log(hashedPassword)
-
-//   //////returns a boolean if the password match or not
-//   const isMatch = await bcrypt.compare('Mstaa7188', hashedPassword)
-//   console.log(isMatch)
-
+//   ///verify the data 
+//  const data =  jwt.verify(token, 'secretWord')
+//  console.log(data)
+// //eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiJhYmMxMjMiLCJpYXQiOjE1OTkyNDAxNzV9.iP_xuy5cxgYRf5sIZE_jqOPVRpBjx2QdJZOJ29fBOHQ
 // }
 
-// myFunction()
+// myFunction( )

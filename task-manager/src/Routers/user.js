@@ -1,6 +1,9 @@
 const express = require("express");
 const router = new express.Router();
 const User = require("../models/user");
+
+const auth = require('../middleware/auth')
+
 router.get("/test", (req, resp) => {
   resp.send("test");
 });
@@ -12,8 +15,10 @@ router.post("/users", async (req, res) => {
 
   try {
     //anything after this will wait until the user is saved
-    await user.save();
-    res.status(201).send(user);
+     await user.save();
+    const token = await user.generateAuthToken()
+
+    res.status(201).send({user, token});
   } catch (e) {
     res.status(400).send(e);
   }
@@ -21,15 +26,27 @@ router.post("/users", async (req, res) => {
   //anything after this will wait until the user is saved
 });
 
-router.get("/users", async (req, res) => {
+router.post("/users/login", async (req, resp) => {
   try {
-    const users = await User.find({});
-    res.status(202).send(users);
+    ///costume function
+    const user = await User.findByCredentials(req.body.email,req.body.password);
+    const token = await user.generateAuthToken()
+    resp.send({user, token})
   } catch (e) {
-    res.status(500).send(e);
+    resp.status(400).send(e);
   }
 });
 
+///auth is our middleware function that run before the rest of the function run
+
+router.get("/users/me", auth, async (req, res) => {
+ 
+res.send(req.user)
+
+
+});
+
+///get the user profile 
 router.get("/users/:id", async (req, res) => {
   const _id = req.params.id;
 
@@ -54,7 +71,6 @@ router.patch("/users/:id", async (req, resp) => {
 
   ///loop in every key sent and check if include the allowed properties
   const isValidOperation = updates.every((update) => {
-    
     ///check if the allowed properties includes the sent one and return boolean value
     return allowedUpdates.includes(update);
   });
@@ -71,14 +87,14 @@ router.patch("/users/:id", async (req, resp) => {
 
     ////the above function bypass mangoose and perform a direct operation on the data base
 
-    const user = await User.findById(req.params.id)
+    const user = await User.findById(req.params.id);
 
-      ///since we are looping thought different properties and we cannot hard coded or know the exact one we are updating
-      ///this will create a dynamic way to update the filed we want to update 
-    updates.forEach((update) => user[update] = req.body[update])
+    ///since we are looping thought different properties and we cannot hard coded or know the exact one we are updating
+    ///this will create a dynamic way to update the filed we want to update
+    updates.forEach((update) => (user[update] = req.body[update]));
 
-      await user.save()
-      
+    await user.save();
+
     if (!user) {
       return resp.status(404).send();
     }

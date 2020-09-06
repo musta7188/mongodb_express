@@ -36,3 +36,6 @@ MongoClient.connect(
 // pwd
 // Users/musta88
 /// /Users/musta88/mongodb/bin/mongod --dbpath=/Users/musta88/mongodb-data
+////how to kill mongodb process 
+///////$ pgrep mongo (this will give you a number: 1350 )
+/////// $ kill 1350

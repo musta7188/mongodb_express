@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const validator = require("validator")
 const bcrypt = require('bcrypt')
+const jwt  = require('jsonwebtoken')
 /// we will costumize the schema before passed to the user
 const userSchema = new mongoose.Schema({
   name: {
@@ -22,6 +23,7 @@ const userSchema = new mongoose.Schema({
     require: true,
     trim: true,
     lowercase: true,
+    unique: true,
     validate(value){
       if(!validator.isEmail(value)){
         throw new Error("email not valid ")
@@ -43,12 +45,60 @@ const userSchema = new mongoose.Schema({
       }
     }
 
-  }
+  },
+  tokens : [{
+    token: {
+      type: String,
+      require: true
+    }
+  }]
 })
 
 
 
-///.pre allow us to do something before the user schema
+
+////methods are method accessible on the instance of the model (instance method in ruby)
+userSchema.methods.generateAuthToken = async function() {
+
+    const user = this
+    const token = jwt.sign({_id: user._id.toString()}, 'SecretWord')
+
+  ///after adding token as property for the user schema and value equal to array of object with multiple token inside in case it log in from
+  ////multiple device, we use the concat method to add all the token 
+        user.tokens = user.tokens.concat({token})
+
+      await user.save()
+
+    return token
+
+}
+
+
+
+
+
+
+///statics method are accessible on the model for example the User Model (class method in Ruby for example )
+///this costume method will be part of the user object whenever is called to check email and password
+userSchema.statics.findByCredentials = async (email, password) => {
+
+  const user = await User.findOne({email})
+
+  if(!user){
+    throw new Error('Unable to login')
+  }
+
+  ///if user is found it check if the password is correct
+  const isMatch = await bcrypt.compare(password, user.password)
+
+  if(!isMatch){
+    throw new Error('Unable to login')
+  }
+
+  return user
+}
+
+///.pre allow us to do something before the user schema in this case to hash the password before saving 
 ///// first is to save and second is the function to run, (we can just use a normal function not a arrow function)
 userSchema.pre('save', async function(next) {
   ///this give us access to the current object or current user that is about to be saved
