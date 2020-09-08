@@ -2,7 +2,7 @@ const express = require("express");
 const router = new express.Router();
 const User = require("../models/user");
 
-const auth = require('../middleware/auth')
+const auth = require("../middleware/auth");
 
 router.get("/test", (req, resp) => {
   resp.send("test");
@@ -15,10 +15,10 @@ router.post("/users", async (req, res) => {
 
   try {
     //anything after this will wait until the user is saved
-     await user.save();
-    const token = await user.generateAuthToken()
+    await user.save();
+    const token = await user.generateAuthToken();
 
-    res.status(201).send({user, token});
+    res.status(201).send({ user, token });
   } catch (e) {
     res.status(400).send(e);
   }
@@ -29,40 +29,68 @@ router.post("/users", async (req, res) => {
 router.post("/users/login", async (req, resp) => {
   try {
     ///costume function
-    const user = await User.findByCredentials(req.body.email,req.body.password);
-    const token = await user.generateAuthToken()
-    resp.send({user, token})
+    const user = await User.findByCredentials(
+      req.body.email,
+      req.body.password
+    );
+    const token = await user.generateAuthToken();
+
+    resp.send({ user, token });
   } catch (e) {
     resp.status(400).send(e);
+  }
+});
+
+router.post("/users/logout", auth, async (req, res) => {
+  try {
+    req.user.tokens = req.user.tokens.filter((tokenObject) => {
+      ///it filter all the tokens that are not equal to the current token
+      return tokenObject.token !== req.token;
+    });
+
+    await req.user.save();
+
+    res.send({ message: "user log out" });
+  } catch (e) {
+    res.status(500).send(e);
+  }
+});
+
+///this route log out from all the device 
+router.post("/users/logoutAll", auth, async (req, res) => {
+  try {
+    req.user.tokens = [];
+    await req.user.save();
+
+    res.send({ message: "user log out" });
+  } catch (e) {
+    res.status(500).send({ error: e });
   }
 });
 
 ///auth is our middleware function that run before the rest of the function run
 
 router.get("/users/me", auth, async (req, res) => {
- 
-res.send(req.user)
-
-
+  res.send(req.user);
 });
 
-///get the user profile 
-router.get("/users/:id", async (req, res) => {
-  const _id = req.params.id;
+// ///get the user profile
+// router.get("/users/:id", async (req, res) => {
+//   const _id = req.params.id;
 
-  try {
-    const user = await User.findById({ _id });
+//   try {
+//     const user = await User.findById({ _id });
 
-    if (!user) {
-      return res.status(404).send("user not found try a different id");
-    }
-    res.send(user);
-  } catch (e) {
-    res.status(500).send(e);
-  }
-});
+//     if (!user) {
+//       return res.status(404).send("user not found try a different id");
+//     }
+//     res.send(user);
+//   } catch (e) {
+//     res.status(500).send({ error: e });
+//   }
+// });
 
-router.patch("/users/:id", async (req, resp) => {
+router.patch("/users/me", auth, async (req, resp) => {
   ////grap all the keys sent from the body
   const updates = Object.keys(req.body);
 
@@ -80,39 +108,22 @@ router.patch("/users/:id", async (req, resp) => {
   }
 
   try {
-    /// new :true : this will return the new user with the updates
-    ////runValidators: true : make sure we use validator to get the format we accepted
-
-    ///const user = await User.findByIdAndUpdate(req.params.id, req.body, {new: true,runValidators: true,});
-
-    ////the above function bypass mangoose and perform a direct operation on the data base
-
-    const user = await User.findById(req.params.id);
-
     ///since we are looping thought different properties and we cannot hard coded or know the exact one we are updating
     ///this will create a dynamic way to update the filed we want to update
-    updates.forEach((update) => (user[update] = req.body[update]));
+    updates.forEach((update) => (req.user[update] = req.body[update]));
 
-    await user.save();
+    await req.user.save();
+    resp.send(req.user);
 
-    if (!user) {
-      return resp.status(404).send();
-    }
-
-    resp.send(user);
   } catch (e) {
     resp.status(400).send(e);
   }
 });
 
-router.delete("/users/:id", async (req, resp) => {
+router.delete('/users/me', auth,  async (req, resp) => {
   try {
-    const user = await User.findByIdAndDelete(req.params.id);
-    if (!user) {
-      return resp.status(404).send({ err: "user not found" });
-    }
-
-    resp.status(200).send(user);
+    await req.user.remove()
+    resp.status(200).send(req.user);
   } catch (e) {
     resp.status(500).send(e);
   }

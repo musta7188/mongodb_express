@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const validator = require("validator")
 const bcrypt = require('bcrypt')
 const jwt  = require('jsonwebtoken')
+const Task = require('./task')
 /// we will costumize the schema before passed to the user
 const userSchema = new mongoose.Schema({
   name: {
@@ -54,7 +55,15 @@ const userSchema = new mongoose.Schema({
   }]
 })
 
-
+//// the virtual method allow to create a virtual attribute/property on the Model/Class without to store it in the DB
+///will refer the task to we can find all the tasks related to the user and create a relationship between the models
+userSchema.virtual('tasks', {
+  ref: 'Task',
+  localField: '_id',
+  foreignField: 'owner'
+  ///localFiled and foreignFiled is what create the relation between the ref task,
+  /// which is the owner ID in the Task model and the User id in the User model
+})
 
 
 ////methods are method accessible on the instance of the model (instance method in ruby)
@@ -73,6 +82,18 @@ userSchema.methods.generateAuthToken = async function() {
 
 }
 
+
+//////toJSON change the way how the user data is sent back
+userSchema.methods.toJSON = function() {
+  const user  = this 
+
+  const userObject = user.toObject()
+///delete from the user object the two properties we do not wan to send back
+  delete userObject.password 
+  delete userObject.tokens
+
+  return userObject
+}
 
 
 
@@ -108,6 +129,22 @@ userSchema.pre('save', async function(next) {
   if(user.isModified('password')){
     user.password = await bcrypt.hash(user.password, 8)
   }
+
+
+
+///delete the suer task when the suer is deleted 
+
+userSchema.pre('remove', async function (next) {
+
+  const user = this 
+
+  await Task.deleteMany({owner: req.user._id})
+
+  next()
+
+})
+
+
 
 
 
