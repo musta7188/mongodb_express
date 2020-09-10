@@ -15,11 +15,12 @@ const auth = async (req, res, next) => {
      ///{ _id: '5f54f5a91423b349b55d363b', iat: 1599404256 }
 
     ///find the user with the correct id that has that token stored in the array of tokens
-    const user = await User.findOne({_id: decoded._id,"tokens.token": token,});
+    const user = await User.findOne({_id: decoded._id,"tokens.token": token});
+
 
 
     if (!user) {
-      throw new Error({error: "user not found "});
+      throw new Error();
     }
 
     ///we add to the request the current token, in way that if you log out you target just the token of the current device you are logged in
@@ -31,7 +32,7 @@ const auth = async (req, res, next) => {
     next();
   } catch (e) {
 
-    res.status(401).send({error: "request failed please log in"});
+    res.status(401).send({error: "please log in"});
 
   }
 };

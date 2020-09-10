@@ -1,8 +1,14 @@
 const express = require("express");
 const router = new express.Router();
-const User = require("../models/user");
+
 
 const auth = require("../middleware/auth");
+const Task = require("../models/task");
+const User = require("../models/user");
+
+const multer = require('multer')
+
+
 
 router.get("/test", (req, resp) => {
   resp.send("test");
@@ -68,27 +74,27 @@ router.post("/users/logoutAll", auth, async (req, res) => {
   }
 });
 
+
+
+const upload = multer({
+  dest: 'profileImage'
+})
+
+router.post('/users/me/avatar', upload.single('avatar'), (req, res) =>{
+  res.send()
+})
+
+
+
+
+
 ///auth is our middleware function that run before the rest of the function run
 
 router.get("/users/me", auth, async (req, res) => {
   res.send(req.user);
 });
 
-// ///get the user profile
-// router.get("/users/:id", async (req, res) => {
-//   const _id = req.params.id;
 
-//   try {
-//     const user = await User.findById({ _id });
-
-//     if (!user) {
-//       return res.status(404).send("user not found try a different id");
-//     }
-//     res.send(user);
-//   } catch (e) {
-//     res.status(500).send({ error: e });
-//   }
-// });
 
 router.patch("/users/me", auth, async (req, resp) => {
   ////grap all the keys sent from the body
@@ -120,11 +126,11 @@ router.patch("/users/me", auth, async (req, resp) => {
   }
 });
 
-router.delete('/users/me', auth,  async (req, resp) => {
+router.delete('/users/me', auth,  async (req, res) => {
   try {
-    await req.user.remove()
-    resp.status(200).send(req.user);
+   const user = await User.findByIdAndDelete(req.user._id)
+   res.send(user)
   } catch (e) {
-    resp.status(500).send(e);
+    res.status(500).send({error: "error from here"});
   }
 });
