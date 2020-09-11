@@ -77,11 +77,23 @@ router.post("/users/logoutAll", auth, async (req, res) => {
 
 
 const upload = multer({
-  dest: 'profileImage'
+  dest: 'profileImage',
+  limits: {
+    fileSize: 1000000
+  },
+  fileFilter(req, file, callback){
+    if(! file.originalname.match(/\.(jpg|jpeg|png)$/)){
+      return callback( new Error('file must be an image'))
+    }
+    callback(undefined, true)
+  }
 })
 
-router.post('/users/me/avatar', upload.single('avatar'), (req, res) =>{
+router.post('/users/me/avatar', auth, upload.single('avatar'), (req, res) =>{
   res.send()
+}, (error, req, res, next) =>{
+
+  res.status(400).send({error: error.message})
 })
 
 
