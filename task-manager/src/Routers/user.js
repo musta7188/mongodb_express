@@ -1,18 +1,16 @@
 const express = require("express");
 const router = new express.Router();
-const sharp  = require('sharp')
+const sharp = require("sharp");
 
 const auth = require("../middleware/auth");
 const Task = require("../models/task");
 const User = require("../models/user");
 
-const multer = require('multer')
+const {sendWelcomeEmail, sendCancelAccount} = require('../emails/account')
 
 
+const multer = require("multer");
 
-router.get("/test", (req, resp) => {
-  resp.send("test");
-});
 
 module.exports = router;
 
@@ -22,6 +20,7 @@ router.post("/users", async (req, res) => {
   try {
     //anything after this will wait until the user is saved
     await user.save();
+    sendWelcomeEmail(user.email, user.name)
     const token = await user.generateAuthToken();
 
     res.status(201).send({ user, token });
@@ -62,7 +61,7 @@ router.post("/users/logout", auth, async (req, res) => {
   }
 });
 
-///this route log out from all the device 
+///this route log out from all the device
 router.post("/users/logoutAll", auth, async (req, res) => {
   try {
     req.user.tokens = [];
@@ -74,82 +73,78 @@ router.post("/users/logoutAll", auth, async (req, res) => {
   }
 });
 
-
-
 const upload = multer({
   // dest: 'profileImage',
   limits: {
-    fileSize: 1000000
+    fileSize: 1000000,
   },
-  fileFilter(req, file, callback){
-    if(! file.originalname.match(/\.(jpg|jpeg|png)$/)){
-      return callback( new Error('file must be an image'))
+  fileFilter(req, file, callback) {
+    if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
+      return callback(new Error("file must be an image"));
     }
-    callback(undefined, true)
+    callback(undefined, true);
+  },
+});
+
+router.post(
+  "/users/me/avatar",
+  auth,
+  upload.single("avatar"),
+  async (req, res) => {
+    ///this format the image before you saved by resizing it and transform it in a png and then ina buffer to save in the db
+    const buffer = await sharp(req.file.buffer)
+      .resize({ width: 250, height: 250 })
+      .png()
+      .toBuffer();
+    req.user.avatar = buffer;
+
+    ///below how to run the binary saved string in db
+    //<img src="data:image/jpg;base64,(here goas the binary string)">
+    ///site to use //jsbin.com/
+    await req.user.save();
+
+    res.send();
+  },
+  (error, req, res, next) => {
+    res.status(400).send({ error: error.message });
   }
-})
+);
 
-router.post('/users/me/avatar', auth, upload.single('avatar'), async (req, res) =>{
+router.delete(
+  "/users/me/avatar",
+  auth,
+  async (req, res) => {
+    req.user.avatar = undefined;
 
-///this format the image before you saved by resizing it and transform it in a png and then ina buffer to save in the db
-const buffer = await sharp(req.file.buffer).resize({width: 250, height: 250}).png().toBuffer()
- req.user.avatar =  buffer
+    await req.user.save();
 
-///below how to run the binary saved string in db
-//<img src="data:image/jpg;base64,(here goas the binary string)">
-///site to use //jsbin.com/
-await req.user.save()
+    res.status(200).send();
+  },
+  (error, req, res, next) => {
+    res.status(400).send({ error: error.message });
+  }
+);
 
-  res.send()
-}, (error, req, res, next) =>{
-
-  res.status(400).send({error: error.message})
-})
-
-router.delete('/users/me/avatar', auth, async (req, res) =>{
-
-   req.user.avatar = undefined
-
-   await req.user.save()
-
-   res.status(200).send()
-
-
-}, (error, req, res, next) =>{
-  res.status(400).send({error: error.message})
-})
-
-
-router.get('/users/:id/avatar', async (req, res) =>{
-
+router.get("/users/:id/avatar", async (req, res) => {
   try {
-      const user = await User.findById(req.params.id)
+    const user = await User.findById(req.params.id);
 
-    if(!user || !user.avatar){
-      throw new Error()
+    if (!user || !user.avatar) {
+      throw new Error();
     }
-///declare the type of data we will rendere 
-    res.set('Content-Type', 'image/png')
-    res.send(user.avatar)
-
-
-  } catch(e) {
-    res.status(404).send()
+    ///declare the type of data we will rendere
+    res.set("Content-Type", "image/png");
+    res.send(user.avatar);
+  } catch (e) {
+    res.status(404).send();
   }
-
-})
-
-
-
-
+});
 
 ///auth is our middleware function that run before the rest of the function run
 
 router.get("/users/me", auth, async (req, res) => {
   res.send(req.user);
 });
-
-
 
 router.patch("/users/me", auth, async (req, resp) => {
   ////grap all the keys sent from the body
@@ -175,17 +170,17 @@ router.patch("/users/me", auth, async (req, resp) => {
 
     await req.user.save();
     resp.send(req.user);
-
   } catch (e) {
     resp.status(400).send(e);
   }
 });
 
-router.delete('/users/me', auth,  async (req, res) => {
+router.delete("/users/me", auth, async (req, res) => {
   try {
-   const user = await User.findByIdAndDelete(req.user._id)
-   res.send(user)
+    const user = await User.findByIdAndDelete(req.user._id);
+    sendCancelAccount(user.email, user.name)
+    res.send(user);
   } catch (e) {
-    res.status(500).send({error: "error from here"});
+    res.status(500).send({ error: "error from here" });
   }
 });
