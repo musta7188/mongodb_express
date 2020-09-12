@@ -29,8 +29,6 @@ MongoClient.connect(
 
 
 
-
-
 /// run the mongodb server on the console
 // cd ~
 // pwd
