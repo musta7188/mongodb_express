@@ -39,3 +39,5 @@ MongoClient.connect(
 ////how to kill mongodb process 
 ///////$ pgrep mongo (this will give you a number: 1350 )
 /////// $ kill 1350
+
+//////npm run dev

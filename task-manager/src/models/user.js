@@ -53,7 +53,11 @@ const userSchema = new mongoose.Schema({
         require: true,
       },
     },
-  ],
+  ], 
+  ///allow to store the buffer with the binary image data along side with the user
+  avatar: {
+    type: Buffer
+  }
 }, {
   timestamps: true
 });
@@ -90,6 +94,7 @@ userSchema.methods.toJSON = function () {
   ///delete from the user object the two properties we do not wan to send back
   delete userObject.password;
   delete userObject.tokens;
+  delete userObject.avatar
 
   return userObject;
 };

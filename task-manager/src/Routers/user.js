@@ -1,6 +1,6 @@
 const express = require("express");
 const router = new express.Router();
-
+const sharp  = require('sharp')
 
 const auth = require("../middleware/auth");
 const Task = require("../models/task");
@@ -77,7 +77,7 @@ router.post("/users/logoutAll", auth, async (req, res) => {
 
 
 const upload = multer({
-  dest: 'profileImage',
+  // dest: 'profileImage',
   limits: {
     fileSize: 1000000
   },
@@ -89,11 +89,54 @@ const upload = multer({
   }
 })
 
-router.post('/users/me/avatar', auth, upload.single('avatar'), (req, res) =>{
+router.post('/users/me/avatar', auth, upload.single('avatar'), async (req, res) =>{
+
+///this format the image before you saved by resizing it and transform it in a png and then ina buffer to save in the db
+const buffer = await sharp(req.file.buffer).resize({width: 250, height: 250}).png().toBuffer()
+ req.user.avatar =  buffer
+
+///below how to run the binary saved string in db
+//<img src="data:image/jpg;base64,(here goas the binary string)">
+///site to use //jsbin.com/
+await req.user.save()
+
   res.send()
 }, (error, req, res, next) =>{
 
   res.status(400).send({error: error.message})
+})
+
+router.delete('/users/me/avatar', auth, async (req, res) =>{
+
+   req.user.avatar = undefined
+
+   await req.user.save()
+
+   res.status(200).send()
+
+
+}, (error, req, res, next) =>{
+  res.status(400).send({error: error.message})
+})
+
+
+router.get('/users/:id/avatar', async (req, res) =>{
+
+  try {
+      const user = await User.findById(req.params.id)
+
+    if(!user || !user.avatar){
+      throw new Error()
+    }
+///declare the type of data we will rendere 
+    res.set('Content-Type', 'image/png')
+    res.send(user.avatar)
+
+
+  } catch(e) {
+    res.status(404).send()
+  }
+
 })
 
 
