@@ -2,3 +2,6 @@ config
 ./dev.env
 PlayGround
 node_modules
+CRUDoperationInNode
+CRUDoperationMongoose
+fizzBuzz.js
