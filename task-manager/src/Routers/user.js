@@ -181,6 +181,6 @@ router.delete("/users/me", auth, async (req, res) => {
     sendCancelAccount(user.email, user.name)
     res.send(user);
   } catch (e) {
-    res.status(500).send({ error: "error from here" });
+    res.status(500).send({ error: e });
   }
 });

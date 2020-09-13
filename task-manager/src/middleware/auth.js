@@ -11,7 +11,7 @@ const auth = async (req, res, next) => {
     ///get the auth from the header delete the Barer word and get the token
     const token = await req.header('Authorization').replace("Bearer ", '')
 
-    const decoded = await jwt.verify(token, "SecretWord");
+    const decoded = await jwt.verify(token, process.env.JWT_SECRET);
      ///{ _id: '5f54f5a91423b349b55d363b', iat: 1599404256 }
 
     ///find the user with the correct id that has that token stored in the array of tokens
