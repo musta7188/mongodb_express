@@ -1,3 +1,4 @@
-./config
+config
 ./dev.env
-./PlayGround
+PlayGround
+node_modules
